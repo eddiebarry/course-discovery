@@ -1206,6 +1206,37 @@ class CourseWithProgramsSerializer(CourseSerializer):
             'advertised_course_run_uuid'
         )
 
+class CourseWithRecommendationsSerializer(MinimalCourseSerializer):
+    recommendations = serializers.SerializerMethodField()
+    def get_recommendations(self, course):
+        return CourseRecommendationSerializer(
+            course.recommendations(),
+            many=True,
+            context={
+                'request': self.context.get('request'),
+            }
+        ).data
+
+    class Meta(MinimalCourseSerializer.Meta):
+        model = Course
+        fields = MinimalCourseSerializer.Meta.fields + ('recommendations', )
+
+
+class CourseRecommendationSerializer(CourseSerializer):
+    advertised_course_run_uuid = serializers.SerializerMethodField()
+
+    class Meta(CourseSerializer.Meta):
+        model = Course
+        fields = CourseSerializer.Meta.fields + (
+            'advertised_course_run_uuid',
+        )
+
+    def get_advertised_course_run_uuid(self, course):
+        if course.advertised_course_run:
+            return course.advertised_course_run.uuid
+        return None
+
+
 
 class CatalogCourseSerializer(CourseSerializer):
     """

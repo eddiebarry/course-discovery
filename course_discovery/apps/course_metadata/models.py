@@ -1130,6 +1130,11 @@ class Course(DraftModelMixin, PkSearchableMixin, CachedMixin, TimeStampedModel):
 
         return advertised_course_run
 
+    def recommendations(self):
+        related_program_courses = list(itertools.chain.from_iterable([program.courses.all() for program in self.programs.all()]))
+        return related_program_courses
+
+
 
 class CourseEditor(TimeStampedModel):
     """
